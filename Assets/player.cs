@@ -26,6 +26,9 @@ public class player : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+        if (gamemanager.instance.win==false)
+        { 
+
         counter -= Time.deltaTime;
 
         if(counter<0)
@@ -44,6 +47,8 @@ public class player : MonoBehaviour {
 
                 Move();
             }
+
+        }
 
         transform.position = Vector3.MoveTowards(transform.position, target, stepSpeed*Time.deltaTime);
         

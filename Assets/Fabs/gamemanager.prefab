@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 1198495038805948}
+  m_IsPrefabParent: 1
+--- !u!1 &1198495038805948
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4265820283417006}
+  - component: {fileID: 114967386384443942}
+  m_Layer: 0
+  m_Name: gamemanager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4265820283417006
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1198495038805948}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.90759027, y: -0.5110855, z: -3.3712225}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114967386384443942
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1198495038805948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c29e8f1b36c5d484cab8996b3cf01d7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
+  gridSize: {x: 10, y: 10}
+  helo: 0
+  makeGrid: 0
+  gridTilefab: {fileID: 1124424486236454, guid: b1952eb4a63599942843ae257eb35ea0,
+    type: 2}
+  playerPos: {x: 0, y: 0}
+  camera2: {fileID: 0}
+  blockFab: {fileID: 1963346948638596, guid: 9e9fe5f8f97822944bdb99e8c703d38b, type: 2}
+  goalExists: 0
+  currentCoins: 0
+  objs: []
+  explosionFab: {fileID: 1343530110247506, guid: c06dca3c94479724081affb472b83b80,
+    type: 2}
+  win: 0

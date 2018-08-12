@@ -32,7 +32,7 @@ public class Cannon : MonoBehaviour {
         countdown--;
 
         if(countdown==1)
-            gamemanager.instance.SetGridVal(pos+shootingDir, 5);
+            gamemanager.instance.SetGridVal(pos+shootingDir, 8);
 
         if (countdown == 0)
         {

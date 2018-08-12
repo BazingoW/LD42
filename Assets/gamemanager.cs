@@ -18,15 +18,21 @@ public class gamemanager : MonoBehaviour {
 
     public Vector2Int playerPos;
 
+    public GameObject camera2;
+
     public GameObject blockFab;
 
     public int[,] gridVals;
+
+    public GameObject[,] gridObjs;
 
     public bool goalExists;
 
     public int currentCoins;
     
     public List<MonoBehaviour> objs;
+
+    public GameObject explosionFab;
    
 
     public bool win = false;
@@ -53,28 +59,54 @@ public class gamemanager : MonoBehaviour {
 
         gridVals = new int[gridSize.x, gridSize.y];
 
+
+        gridObjs = new GameObject[gridSize.x, gridSize.y];
+       
+
         coinGrid =  CoinSetter();
 
         GridSetter();
+
+
     }
 
     void GridSetter()
     {
         TileSetter("goal",3);
+
+        TileSetter("bomb", 6);
+
+        TileSetter("button", 10);
+
+        TileSetter("door", 9);
+
+        TileSetter("block", 1);
+
+        ///setting cannon stuff
         GameObject[] c =  TileSetter("cannon", 4);
 
 
         foreach (var item in c)
         {
             objs.Add(item.GetComponent<Cannon>());
+
         }
-       
+
+        //Setting tripwire thing
+        GameObject[] g = TileSetter("tripwire", 4);
+
+        foreach (var item in g)
+        {
+            item.GetComponent<TripWire>().SetupWire(new Vector2Int(-1,-1));
+        }
+
     }
 
     GameObject[] TileSetter(string tag,int value)
     {
         GameObject[] c = GameObject.FindGameObjectsWithTag(tag);
 
+        if(value==3)
          if(c.Length>0) goalExists =true;
 
         foreach (var item in c)
@@ -82,7 +114,11 @@ public class gamemanager : MonoBehaviour {
             Vector2Int aux = Get2DPos(item.transform.position);
 
                gridVals[aux.x, aux.y] = value;
-        
+
+            //Debug.Log(item);
+               gridObjs[aux.x, aux.y] = item;
+
+
         }
 
         return c;
@@ -153,6 +189,9 @@ public class gamemanager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+        if (win)
+            return;
+
         if (Input.GetKeyDown(KeyCode.R))
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -168,6 +207,37 @@ public class gamemanager : MonoBehaviour {
             MoveTime();
             PrintGrid();
 
+        }
+
+    }
+
+    public void Explode( Vector2Int origin)
+    {
+        for (int i = origin.x-1; i <= origin.x+1; i++)
+        {
+            for (int j = origin.y-1; j <= origin.y+1; j++)
+            {
+                Instantiate(explosionFab, Get3DPos(new Vector2Int(i, j)), Quaternion.identity);
+
+                //Debug.Log(new Vector2Int(i, j));
+                //Debug.Log(GetGridVal(new Vector2Int(i, j)));
+
+                if(GetGridVal(new Vector2Int(i, j)) == 1 || GetGridVal(new Vector2Int(i, j)) == 4)
+                {
+                    Debug.Log("Destroying");
+                    Debug.Log(new Vector2Int(i, j));
+                    //destroy
+                    Destroy(gridObjs[i, j]);
+
+                    //clear on obj board
+                    gridObjs[i, j] = null;
+
+                    //clear on value board
+                    SetGridVal(new Vector2Int(i, j), 0);
+
+
+                }
+            }
         }
 
     }
@@ -192,10 +262,58 @@ public class gamemanager : MonoBehaviour {
 
             }
 
-            
+            //if it contains a bomb
+            if (gridVals[nextPos.x, nextPos.y] == 6)
+            {
+                Explode( nextPos );
+
+            }
+
+            //if it contains a button
+            if (gridVals[nextPos.x, nextPos.y] == 10)
+            {
+                Debug.Log("over a button");
+                GameObject go = gridObjs[nextPos.x, nextPos.y].GetComponent<button1>().door;
+                Vector2Int v = Get2DPos(gridObjs[nextPos.x, nextPos.y].GetComponent<button1>().door.transform.position);
+                Destroy(go);
+                gridVals[v.x, v.y] = 0;
+
+            }
+
+
+            //if is on wire
+            if (gridVals[nextPos.x, nextPos.y] == 5)
+            {
+                Debug.Log("traptrigger");
+
+                //Setting tripwire thing
+                GameObject[] g = GameObject.FindGameObjectsWithTag("tripwire");
+
+                foreach (var item in g)
+                {   
+                    Vector2Int dir = nextPos - Get2DPos(item.transform.position);
+                    
+                    //same row or col
+                    if(dir.x==0 || dir.y==0)
+                    {
+                        if (dir.x != 0) dir.x = 1;
+                        if (dir.y != 0) dir.y = 1;
+
+                        if(dir == item.GetComponent<TripWire>().wireDir)
+                        {
+                            item.GetComponent<TripWire>().TriggerTrap(nextPos);
+                        }
+                    }
+
+
+                    item.GetComponent<TripWire>().SetupWire(new Vector2Int(-1, -1));
+                }
+
+            }
+
 
             //if destiny position is empty
-            if ( !(gridVals[nextPos.x, nextPos.y] == 1 || gridVals[nextPos.x, nextPos.y] == 4))
+            if ( !(gridVals[nextPos.x, nextPos.y] == 1 || gridVals[nextPos.x, nextPos.y] == 4 || gridVals[nextPos.x, nextPos.y] == 9 || gridVals[nextPos.x, nextPos.y] == 8))
             {
                 //move player
                 playerPos = nextPos;
@@ -239,15 +357,31 @@ public class gamemanager : MonoBehaviour {
         }
     }
 
-    public int PutBlock(int x, int z)
+    public int PutBlock( int x, int z)
     {
-    
+        //check wire
+        if((gridVals[x, z] == 5))
+            {
+
+            //rerender all wires
+            GameObject[] g = TileSetter("tripwire", 4);
+
+            foreach (var item in g)
+            {
+                item.GetComponent<TripWire>().SetupWire(new Vector2Int(x,z));
+            }
+        }
         
 
         if( ! (gridVals[x, z] == 1 || gridVals[x, z] == 4))
         {
-            Instantiate(blockFab, new Vector3(x, 0, z), Quaternion.identity);
+           
             gridVals[x, z] = 1;
+
+            gridObjs[x,z] = (GameObject)Instantiate(blockFab, new Vector3(x, 0, z), Quaternion.identity);
+
+            //Debug.Log(gridObjs[x, z]);
+
             return 0;
         }
         
@@ -330,5 +464,21 @@ public class gamemanager : MonoBehaviour {
     {
         Debug.Log("You Won");
         win = true;
+
+        StartCoroutine(winRoutine());
+
+    }
+
+    IEnumerator winRoutine()
+    {
+
+        player.GetComponent<Animator>().enabled = true;
+        yield return new WaitForSeconds(1f);
+
+        camera2.GetComponentInChildren<Animator>().SetTrigger("out");
+
+        yield return new WaitForSeconds(1f);
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex+1);
     }
 }

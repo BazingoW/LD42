@@ -36,7 +36,7 @@ public class MovingBlock : MonoBehaviour {
         if (gamemanager.instance.GetGridVal(pos+movingDir) == 1 || gamemanager.instance.Get2DPos(player.instance.transform.position)==pos+movingDir)
         {
             shouldBeDeleted = true;
-            Debug.Log("walledoff");
+            //Debug.Log("walledoff");
 
         }
         else { 
@@ -65,7 +65,7 @@ public class MovingBlock : MonoBehaviour {
             
         }
         else
-        gamemanager.instance.SetGridVal(pos + movingDir, 5);
+        gamemanager.instance.SetGridVal(pos + movingDir, 8);
 
         }
 
