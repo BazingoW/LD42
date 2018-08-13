@@ -31,12 +31,12 @@ public class TripWire : MonoBehaviour {
         while (aux!=playerPos)
         {
 
-            gamemanager.instance.gridVals[aux.x, aux.y] = 1;
+           
             
             //TODO improve this line
-            gamemanager.instance.gridObjs[aux.x, aux.y] = (GameObject)Instantiate(gamemanager.instance.blockFab, new Vector3(aux.x, 0, aux.y), Quaternion.identity);
+           GameObject go = (GameObject)Instantiate(gamemanager.instance.blockFab, new Vector3(aux.x, 0, aux.y), Quaternion.identity);
 
-
+            gamemanager.instance.SetSlot(aux,1,go,true);
 
             aux = aux + wireDir;
         }
@@ -52,7 +52,7 @@ public class TripWire : MonoBehaviour {
 
         Vector2Int aux = gamemanager.instance.Get2DPos(transform.position) + wireDir;
 
-        while(  gamemanager.instance.GetGridVal(aux)>=0)
+        while(  gamemanager.instance.GetSlot(aux).type>=0)
         {
 
             if (aux == wallPos)
@@ -64,15 +64,15 @@ public class TripWire : MonoBehaviour {
 
             if (walledOff == false)
             {
-                gamemanager.instance.SetGridVal(aux, 5);
+                gamemanager.instance.SetSlot(aux, 5,this.gameObject,false);
             }
 
             if(walledOff==true)
             {
-                if (gamemanager.instance.GetGridVal(aux) == 5)
+                if (gamemanager.instance.GetSlot(aux).type == 5)
                 {
                     Debug.Log("clean wire");
-                    gamemanager.instance.SetGridVal(aux, 0);
+                    gamemanager.instance.SetSlot(aux, 0);
                 }
             }
             

@@ -33,7 +33,7 @@ public class MovingBlock : MonoBehaviour {
     public void PassTime()
     {
 
-        if (gamemanager.instance.GetGridVal(pos+movingDir) == 1 || gamemanager.instance.Get2DPos(player.instance.transform.position)==pos+movingDir)
+        if (gamemanager.instance.GetSlot(pos+movingDir).type == 1 || gamemanager.instance.Get2DPos(player.instance.transform.position)==pos+movingDir)
         {
             shouldBeDeleted = true;
             //Debug.Log("walledoff");
@@ -44,7 +44,7 @@ public class MovingBlock : MonoBehaviour {
      
 
 
-            gamemanager.instance.SetGridVal(pos + movingDir, 0);
+            gamemanager.instance.SetSlot(pos + movingDir, 0,null,false);
 
 
 
@@ -60,12 +60,12 @@ public class MovingBlock : MonoBehaviour {
 
      
 
-        if(gamemanager.instance.GetGridVal(pos+movingDir)==1)
+        if(gamemanager.instance.GetSlot(pos+movingDir).type==1)
         {
             
         }
         else
-        gamemanager.instance.SetGridVal(pos + movingDir, 8);
+        gamemanager.instance.SetSlot(pos + movingDir, 8,this.gameObject,false);
 
         }
 

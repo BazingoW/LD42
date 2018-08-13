@@ -22,10 +22,6 @@ public class gamemanager : MonoBehaviour {
 
     public GameObject blockFab;
 
-    public int[,] gridVals;
-
-    public GameObject[,] gridObjs;
-
     public bool goalExists;
 
     public int currentCoins;
@@ -37,13 +33,23 @@ public class gamemanager : MonoBehaviour {
 
     public bool win = false;
 
-   /* public struct coin
-    {
-        Vector2Int pos;
-        GameObject obj;
-    }*/
 
-    public GameObject[,] coinGrid;
+    public struct slot
+    {
+       public bool isSolid;
+        public GameObject go;
+        public int type;
+    }
+
+    /* public struct coin
+     {
+         Vector2Int pos;
+         GameObject obj;
+     }*/
+
+    public slot[,] board;
+
+
 
     // Use this for initialization
     void Awake () {
@@ -55,107 +61,96 @@ public class gamemanager : MonoBehaviour {
         if(makeGrid)
         MakeGrid();
 
-        playerPos = new Vector2Int(Mathf.RoundToInt(player.transform.position.x), Mathf.RoundToInt(player.transform.position.z));
+        playerPos = Get2DPos(player.transform.position);
 
-        gridVals = new int[gridSize.x, gridSize.y];
+        board = new slot[gridSize.x,gridSize.y];
 
-
-        gridObjs = new GameObject[gridSize.x, gridSize.y];
        
 
-        coinGrid =  CoinSetter();
 
-        GridSetter();
+
+        GridSetter2();
 
 
     }
 
-    void GridSetter()
+    void GridSetter2()
     {
-        TileSetter("goal",3);
-
-        TileSetter("bomb", 6);
-
-        TileSetter("button", 10);
-
-        TileSetter("door", 9);
-
-        TileSetter("block", 1);
-
-        ///setting cannon stuff
-        GameObject[] c =  TileSetter("cannon", 4);
-
-
-        foreach (var item in c)
+        //initializing
+        for (int i = 0; i < gridSize.x; i++)
         {
-            objs.Add(item.GetComponent<Cannon>());
+            for (int j = 0; j < gridSize.y; j++)
+            {
+                SetSlot(new Vector2Int(i, j), 0, null, false);
+
+            }
 
         }
 
-        //Setting tripwire thing
-        GameObject[] g = TileSetter("tripwire", 4);
+        if (TileSetter2("goal", 3, false).Length > 0) goalExists = true;
 
-        foreach (var item in g)
-        {
-            item.GetComponent<TripWire>().SetupWire(new Vector2Int(-1,-1));
-        }
+        currentCoins = TileSetter2("coin", 7, false).Length;
+
+
+        TileSetter2("bomb", 6, false);
+
+        TileSetter2("button", 10, false);
+
+        TileSetter2("door", 9, true);
+
+        TileSetter2("block", 1, true);
+
+        TileSetter2("cannon", 4, true);
+
+        TileSetter2("tripwire", 4, true);
 
     }
 
-    GameObject[] TileSetter(string tag,int value)
+    GameObject[] TileSetter2(string tag, int value, bool isSolid)
     {
         GameObject[] c = GameObject.FindGameObjectsWithTag(tag);
 
-        if(value==3)
-         if(c.Length>0) goalExists =true;
+        
 
         foreach (var item in c)
         {
             Vector2Int aux = Get2DPos(item.transform.position);
 
-               gridVals[aux.x, aux.y] = value;
-
-            //Debug.Log(item);
-               gridObjs[aux.x, aux.y] = item;
-
-
+            SetSlot(aux, value, item, isSolid);
         }
 
         return c;
     }
 
-
-    //gets coins from map, and sets them on the map
-    GameObject[,] CoinSetter()
+   public  slot GetSlot(Vector2Int aux)
     {
-        GameObject[] c = GameObject.FindGameObjectsWithTag("coin");
-
-        GameObject[,] cg = new GameObject[gridSize.x, gridSize.x];
-
-        currentCoins = c.Length;
-
-        foreach (var item in c)
-        {
-            Vector2Int aux = Get2DPos(item.transform.position);
-
-            cg[aux.x, aux.y] = item;
-
-            gridVals[aux.x, aux.y] = 2;
-
-            
-        }
-
-        return cg;
+        return board[aux.x, aux.y];
     }
+
+    public  slot SetSlot(Vector2Int pos,int type,GameObject go=null,bool isSolid=false)
+    {
+        
+        board[pos.x, pos.y].type = type;
+        board[pos.x, pos.y].isSolid = isSolid;
+        board[pos.x, pos.y].go = go;
+
+        return board[pos.x, pos.y];
+    }
+
+  
+  
+
+
+   
 
     public Vector2Int Get2DPos(Vector3 p)
     {
         return new Vector2Int(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.z));
     }
 
-    public Vector3 Get3DPos(Vector2Int p)
+    public Vector3 Get3DPos(Vector2Int p, float y = 0)
     {
-        return new Vector3(p.x,0,p.y);
+        return new Vector3(p.x,y,p.y);
     }
 
     public bool OutofBounds(Vector2Int coord)
@@ -167,24 +162,10 @@ public class gamemanager : MonoBehaviour {
         return true;
     }
 
-    public bool SetGridVal(Vector2Int coord, int val)
-    {
-        if (coord.x >= 0 && coord.y >= 0 && coord.x < gridSize.x && coord.y < gridSize.y)
-        {
-            gridVals[coord.x, coord.y] = val;
-            return true;
-        }
-        return false;
+    
 
-    }
 
-    public int GetGridVal(Vector2Int coord)
-    {
-        if (coord.x >= 0 && coord.y >= 0 && coord.x < gridSize.x && coord.y < gridSize.y)
-            return gridVals[coord.x, coord.y];
-        else
-            return -1;
-    }
+   
 	
 	// Update is called once per frame
 	void Update () {
@@ -222,18 +203,18 @@ public class gamemanager : MonoBehaviour {
                 //Debug.Log(new Vector2Int(i, j));
                 //Debug.Log(GetGridVal(new Vector2Int(i, j)));
 
-                if(GetGridVal(new Vector2Int(i, j)) == 1 || GetGridVal(new Vector2Int(i, j)) == 4)
+                slot s = GetSlot(new Vector2Int(i, j));
+
+                if (s.isSolid)
                 {
                     Debug.Log("Destroying");
                     Debug.Log(new Vector2Int(i, j));
                     //destroy
-                    Destroy(gridObjs[i, j]);
+                    Destroy(s.go);
 
-                    //clear on obj board
-                    gridObjs[i, j] = null;
-
-                    //clear on value board
-                    SetGridVal(new Vector2Int(i, j), 0);
+                    //set slot as empty
+                    SetSlot(new Vector2Int(i, j), 0, null, false);
+                   
 
 
                 }
@@ -247,28 +228,53 @@ public class gamemanager : MonoBehaviour {
 
 
 
-        //check outofbounds
+        //output will be one of this two
         Vector2Int prevPos = playerPos;
         Vector2Int nextPos = playerPos + move;
 
+        //if out of bounds, stay in place
+        if (OutofBounds(nextPos))
+            return Get3DPos(prevPos, player.transform.position.y);
 
-        if (nextPos.x >= 0 && nextPos.y >= 0 && nextPos.x < gridSize.x && nextPos.y < gridSize.y)
-        {
-           
-            //if it contains a coin
-            if (gridVals[nextPos.x, nextPos.y] == 2)
+
+        //if it is solid, stay in place
+
+        if(GetSlot(nextPos).isSolid==true)
+            return Get3DPos(prevPos, player.transform.position.y);
+        
+
+        
+        MoveTime();
+
+        
+
+          
+         //occupy previous position
+         PutBlock(prevPos);
+          
+
+         CheckWin();
+       
+
+        playerPos = nextPos;
+
+        return Get3DPos(nextPos, player.transform.position.y);
+    }
+
+        //if it contains a coin
+       /* if (gridVals[nextPos.x, nextPos.y] == 2)
             {
                 CollectCoin(nextPos.x, nextPos.y);
 
-            }
-
+            }*/
+            /*
             //if it contains a bomb
             if (gridVals[nextPos.x, nextPos.y] == 6)
             {
                 Explode( nextPos );
 
-            }
-
+            }*/
+            /*
             //if it contains a button
             if (gridVals[nextPos.x, nextPos.y] == 10)
             {
@@ -278,9 +284,9 @@ public class gamemanager : MonoBehaviour {
                 Destroy(go);
                 gridVals[v.x, v.y] = 0;
 
-            }
+            }*/
 
-
+        /*
             //if is on wire
             if (gridVals[nextPos.x, nextPos.y] == 5)
             {
@@ -310,30 +316,16 @@ public class gamemanager : MonoBehaviour {
                 }
 
             }
+            */
+            
 
+         
 
-            //if destiny position is empty
-            if ( !(gridVals[nextPos.x, nextPos.y] == 1 || gridVals[nextPos.x, nextPos.y] == 4 || gridVals[nextPos.x, nextPos.y] == 9 || gridVals[nextPos.x, nextPos.y] == 8))
-            {
-                //move player
-                playerPos = nextPos;
-
-                MoveTime();
-
-            }
-
-            if(playerPos!=prevPos)
-            {
-                //occupy previous position
-                PutBlock(prevPos.x, prevPos.y);
-            }
-
-            CheckWin();
-            }
+        
             //PrintGrid();
 
-        return new Vector3(playerPos.x,player.transform.position.y,playerPos.y);
-    }
+    
+    
 
 
     void MoveTime()
@@ -357,36 +349,15 @@ public class gamemanager : MonoBehaviour {
         }
     }
 
-    public int PutBlock( int x, int z)
+    public GameObject PutBlock( Vector2Int p)
     {
-        //check wire
-        if((gridVals[x, z] == 5))
-            {
+        
+        GameObject go = (GameObject)Instantiate(blockFab, new Vector3(p.x, 0, p.y), Quaternion.identity);
 
-            //rerender all wires
-            GameObject[] g = TileSetter("tripwire", 4);
-
-            foreach (var item in g)
-            {
-                item.GetComponent<TripWire>().SetupWire(new Vector2Int(x,z));
-            }
-        }
+        SetSlot(p, 1 ,go,true );
         
 
-        if( ! (gridVals[x, z] == 1 || gridVals[x, z] == 4))
-        {
-           
-            gridVals[x, z] = 1;
-
-            gridObjs[x,z] = (GameObject)Instantiate(blockFab, new Vector3(x, 0, z), Quaternion.identity);
-
-            //Debug.Log(gridObjs[x, z]);
-
-            return 0;
-        }
-        
-
-        return 1;
+        return go;
 
     }
 
@@ -408,11 +379,11 @@ public class gamemanager : MonoBehaviour {
     {
         string str = "";
 
-        for (int i = 0; i < gridSize.x; i++)
+        for (int i = gridSize.x-1; i >= 0; i--)
         {
             for (int j = 0; j < gridSize.y; j++)
             {
-                str += gridVals[i, j].ToString();
+                str += board[j, i].type.ToString();
 
 
             }
@@ -423,18 +394,6 @@ public class gamemanager : MonoBehaviour {
     }
 
 
-    //fetches coin
-    void CollectCoin( int x, int y)
-    {
-        gridVals[x, y] = 0;
-
-        coinGrid[x, y].GetComponentInChildren<Animator>().SetTrigger("Collect");
-        Destroy(coinGrid[x, y], 1);
-
-        currentCoins--;
-
-          
-    }
 
     void CheckWin()
     {
@@ -450,7 +409,7 @@ public class gamemanager : MonoBehaviour {
         }
         else
         {
-            if(currentCoins==0 && gridVals[playerPos.x, playerPos.y]==3)
+            if(currentCoins==0 && GetSlot(playerPos).type == 3)
             {
                 Win();
             }

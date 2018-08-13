@@ -32,13 +32,13 @@ public class Cannon : MonoBehaviour {
         countdown--;
 
         if(countdown==1)
-            gamemanager.instance.SetGridVal(pos+shootingDir, 8);
+            gamemanager.instance.SetSlot(pos+shootingDir, 8,null,true);
 
         if (countdown == 0)
         {
             Shoot();
             countdown = spacing;
-            gamemanager.instance.SetGridVal(pos+ shootingDir, 0);
+            gamemanager.instance.SetSlot(pos+ shootingDir, 0,null,false);
         }
  
     }
