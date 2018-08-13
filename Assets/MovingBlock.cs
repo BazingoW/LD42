@@ -80,7 +80,7 @@ public class MovingBlock : MonoBehaviour {
         transform.position += actualMov;
 
         if (shouldBeDeleted)
-        { gamemanager.instance.objs.Remove(this); 
+        {// gamemanager.instance.objs.Remove(this); 
             Destroy(gameObject);
         }
 

@@ -4,13 +4,18 @@ using UnityEngine;
 
 public class Cannon : MonoBehaviour {
 
-
+    //spacing betwwen shots
     public int spacing=3;
+
+    //currentcount to shoot
     public int countdown=0;
+
+    //initial offset
     public int offset;
 
     Vector2Int pos;
 
+    //prefab
     public GameObject movingBlock;
 
     public Vector2Int shootingDir;
@@ -20,13 +25,10 @@ public class Cannon : MonoBehaviour {
         countdown = Mathf.Clamp(offset, 0, spacing)+1;
 
         pos = gamemanager.instance.Get2DPos(transform.position);
-	} 
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 
+        shootingDir = new Vector2Int((int)transform.right.x, (int)transform.right.z);
+    } 
+	
     public void PassTime()
     {
         countdown--;
@@ -51,7 +53,7 @@ public class Cannon : MonoBehaviour {
 
         m.movingDir = shootingDir;
 
-        gamemanager.instance.objs.Add(m);
+        
 
         
     }

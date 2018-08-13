@@ -26,7 +26,6 @@ public class gamemanager : MonoBehaviour {
 
     public int currentCoins;
     
-    public List<MonoBehaviour> objs;
 
     public GameObject explosionFab;
    
@@ -37,7 +36,7 @@ public class gamemanager : MonoBehaviour {
     public struct slot
     {
        public bool isSolid;
-        public GameObject go;
+        public MonoBehaviour mono;
         public int type;
     }
 
@@ -129,10 +128,15 @@ public class gamemanager : MonoBehaviour {
 
     public  slot SetSlot(Vector2Int pos,int type,GameObject go=null,bool isSolid=false)
     {
+        MonoBehaviour m = null;
+
+        if (go!=null)
+          m = go.GetComponent<MonoBehaviour>();
         
+
         board[pos.x, pos.y].type = type;
         board[pos.x, pos.y].isSolid = isSolid;
-        board[pos.x, pos.y].go = go;
+        board[pos.x, pos.y].mono = m ;
 
         return board[pos.x, pos.y];
     }
@@ -210,7 +214,7 @@ public class gamemanager : MonoBehaviour {
                     Debug.Log("Destroying");
                     Debug.Log(new Vector2Int(i, j));
                     //destroy
-                    Destroy(s.go);
+                    Destroy(s.mono.gameObject);
 
                     //set slot as empty
                     SetSlot(new Vector2Int(i, j), 0, null, false);
@@ -330,23 +334,17 @@ public class gamemanager : MonoBehaviour {
 
     void MoveTime()
     {
-        
-
-        foreach (var item in objs.ToArray())
+        for (int i = 0; i < gridSize.x; i++)
         {
-            item.SendMessage("PassTime");
-           
-           /* if (item.GetType() == typeof(Cannon))
-                ((Cannon)item).PassTime();
-
-            if (item.GetType() == typeof(MovingBlock))
+            for (int j = 0; j < gridSize.y; j++)
             {
-                ((MovingBlock)item).PassTime();
-                Debug.Log("triggered");
-                Debug.Log(Time.time);
-                
-            }*/
+                if(board[i, j].mono!=null)
+                board[i, j].mono.SendMessage("PassTime");
+
+            }
         }
+
+        // item.SendMessage("PassTime");
     }
 
     public GameObject PutBlock( Vector2Int p)
