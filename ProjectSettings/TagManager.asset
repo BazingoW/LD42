@@ -12,6 +12,8 @@ TagManager:
   - door
   - button
   - block
+  - movingblock
+  - wire
   layers:
   - Default
   - TransparentFX

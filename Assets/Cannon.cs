@@ -38,7 +38,7 @@ public class Cannon : MonoBehaviour {
 
         if (countdown == 0)
         {
-            Shoot();
+            Invoke("Shoot", 0.20f);
             countdown = spacing;
             gamemanager.instance.SetSlot(pos+ shootingDir, 0,null,false);
         }

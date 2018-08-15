@@ -23,7 +23,7 @@ public class MovingBlock : MonoBehaviour {
 
         pos = gamemanager.instance.Get2DPos(transform.position);
 
-       
+        gamemanager.instance.SetSlot(pos, 5, gameObject, false);
     }
 	
 	// Update is called once per frame
@@ -32,58 +32,38 @@ public class MovingBlock : MonoBehaviour {
 
     public void PassTime()
     {
+        
 
-        if (gamemanager.instance.GetSlot(pos+movingDir).type == 1 || gamemanager.instance.Get2DPos(player.instance.transform.position)==pos+movingDir)
-        {
+        if (gamemanager.instance.OutofBounds(pos + movingDir)==true || gamemanager.instance.GetSlot(pos + movingDir).isSolid == true)
             shouldBeDeleted = true;
-            //Debug.Log("walledoff");
-
-        }
-        else { 
-            
-     
-
-
-            gamemanager.instance.SetSlot(pos + movingDir, 0,null,false);
-
-
-
-        pos = pos + movingDir;
-
-        //check if it is out of bounds
-        if (gamemanager.instance.OutofBounds(pos))
-        {
-
-            
-            shouldBeDeleted = true;
-        }
 
      
-
-        if(gamemanager.instance.GetSlot(pos+movingDir).type==1)
-        {
-            
-        }
-        else
-        gamemanager.instance.SetSlot(pos + movingDir, 8,this.gameObject,false);
-
-        }
+        
+       
 
 
-
+        //moves the thing
         anim.SetTrigger("down");
     }
 
+    //called after down animation
     void MoveNext()
     {
+        gamemanager.instance.SetSlot(pos, 0, null, false);
+
         gameObject.SetActive(false);
         transform.position += actualMov;
 
         if (shouldBeDeleted)
-        {// gamemanager.instance.objs.Remove(this); 
+        {
             Destroy(gameObject);
+            return;
         }
 
+        //moves to next position
         gameObject.SetActive(true);
+        pos = pos + movingDir;
+        gamemanager.instance.SetSlot(pos, 5, gameObject, false);
+
     }
 }

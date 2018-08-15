@@ -50,14 +50,13 @@ public class gamemanager : MonoBehaviour {
 
 
 
-    // Use this for initialization
-    void Awake () {
-        instance = this;
-	}
-
-    void Start()
+ 
+    //must be set before other things
+    void Awake()
     {
-        if(makeGrid)
+        instance = this;
+
+        if (makeGrid)
         MakeGrid();
 
         playerPos = Get2DPos(player.transform.position);
@@ -89,7 +88,6 @@ public class gamemanager : MonoBehaviour {
         if (TileSetter2("goal", 3, false).Length > 0) goalExists = true;
 
         currentCoins = TileSetter2("coin", 7, false).Length;
-
 
         TileSetter2("bomb", 6, false);
 
@@ -247,6 +245,7 @@ public class gamemanager : MonoBehaviour {
             return Get3DPos(prevPos, player.transform.position.y);
         
 
+      
         
         MoveTime();
 
@@ -262,84 +261,36 @@ public class gamemanager : MonoBehaviour {
 
         playerPos = nextPos;
 
+        slot s = GetSlot(playerPos);
+
+        if (s.type==8)
+        {
+            foreach (Vector2Int o in ((Wire)s.mono).origin)
+            {
+                ((TripWire)GetSlot(o).mono).Triggered(playerPos);
+            }
+        }
+
+
         return Get3DPos(nextPos, player.transform.position.y);
     }
 
-        //if it contains a coin
-       /* if (gridVals[nextPos.x, nextPos.y] == 2)
-            {
-                CollectCoin(nextPos.x, nextPos.y);
-
-            }*/
-            /*
-            //if it contains a bomb
-            if (gridVals[nextPos.x, nextPos.y] == 6)
-            {
-                Explode( nextPos );
-
-            }*/
-            /*
-            //if it contains a button
-            if (gridVals[nextPos.x, nextPos.y] == 10)
-            {
-                Debug.Log("over a button");
-                GameObject go = gridObjs[nextPos.x, nextPos.y].GetComponent<button1>().door;
-                Vector2Int v = Get2DPos(gridObjs[nextPos.x, nextPos.y].GetComponent<button1>().door.transform.position);
-                Destroy(go);
-                gridVals[v.x, v.y] = 0;
-
-            }*/
-
-        /*
-            //if is on wire
-            if (gridVals[nextPos.x, nextPos.y] == 5)
-            {
-                Debug.Log("traptrigger");
-
-                //Setting tripwire thing
-                GameObject[] g = GameObject.FindGameObjectsWithTag("tripwire");
-
-                foreach (var item in g)
-                {   
-                    Vector2Int dir = nextPos - Get2DPos(item.transform.position);
-                    
-                    //same row or col
-                    if(dir.x==0 || dir.y==0)
-                    {
-                        if (dir.x != 0) dir.x = 1;
-                        if (dir.y != 0) dir.y = 1;
-
-                        if(dir == item.GetComponent<TripWire>().wireDir)
-                        {
-                            item.GetComponent<TripWire>().TriggerTrap(nextPos);
-                        }
-                    }
-
-
-                    item.GetComponent<TripWire>().SetupWire(new Vector2Int(-1, -1));
-                }
-
-            }
-            */
-            
-
-         
-
-        
-            //PrintGrid();
-
     
-    
-
-
     void MoveTime()
     {
+
+     
+
         for (int i = 0; i < gridSize.x; i++)
         {
             for (int j = 0; j < gridSize.y; j++)
             {
-                if(board[i, j].mono!=null)
-                board[i, j].mono.SendMessage("PassTime");
+                if (board[i, j].mono != null)
+                {
+
+                    board[i, j].mono.SendMessage("PassTime");
+                }
+                
 
             }
         }
