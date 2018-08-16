@@ -7,49 +7,68 @@ using UnityEngine.SceneManagement;
 
 public class gamemanager : MonoBehaviour {
 
+    //delegate the passes time
     public delegate void UpdateDel();
     public UpdateDel updateDelegate;
 
+    //player gameobject
     public GameObject player;
 
+    //gamemanager instance
     public static gamemanager instance = null;
 
+    //gridsize
     public Vector2Int gridSize;
-    public int helo;
+    
+    //used to make the grid
     public bool makeGrid = false;
     public GameObject gridTilefab;
 
+    //current player position
     public Vector2Int playerPos;
 
+    //game gameobject
     public GameObject camera2;
 
+    //prefab of regular block
     public GameObject blockFab;
 
+    //tells if exists a goal
     public bool goalExists;
 
+    //holds number of existing coins
     public int currentCoins;
     
-
+    //explosion block
     public GameObject explosionFab;
    
-
+    //if win has been achieved
     public bool win = false;
 
-
+    //slot structure
     public struct slot
     {
-       public bool isSolid;
-        public MonoBehaviour mono;
-        public GameObject go;
-        public int type;
+       public bool isSolid;             //if block is solid
+        public MonoBehaviour mono;      //its monobehabiour
+        public GameObject go;           //its gameobject
+        public int type;                //its type
     }
 
-    /* public struct coin
-     {
-         Vector2Int pos;
-         GameObject obj;
-     }*/
+    /// <summary>
+    /// Type subtitle
+    /// 1 - normal block
+    /// 2
+    /// 3 - goal
+    /// 4 - cannon & tripwire
+    /// 5 - movingblock
+    /// 6 - bomb
+    /// 7 - coin
+    /// 8
+    /// 9 - door
+    /// 10 - button
+    /// </summary>
 
+    //board grid
     public slot[,] board;
 
 
@@ -63,14 +82,13 @@ public class gamemanager : MonoBehaviour {
         if (makeGrid)
         MakeGrid();
 
+        //set current player position
         playerPos = Get2DPos(player.transform.position);
 
+        //create board
         board = new slot[gridSize.x,gridSize.y];
 
-       
-
-
-
+        //fill board
         GridSetter2();
 
 
@@ -78,7 +96,7 @@ public class gamemanager : MonoBehaviour {
 
     void GridSetter2()
     {
-        //initializing
+        //initializing at zero and nonsolid
         for (int i = 0; i < gridSize.x; i++)
         {
             for (int j = 0; j < gridSize.y; j++)
@@ -89,18 +107,25 @@ public class gamemanager : MonoBehaviour {
 
         }
 
+        //setting the goal slots, and goalExists 
         if (TileSetter2("goal", 3, false).Length > 0) goalExists = true;
 
+        //setting coin slots and coinCount
         currentCoins = TileSetter2("coin", 7, false).Length;
 
+        //setting bomb slots
         TileSetter2("bomb", 6, false);
 
+        //setting buttin slots
         TileSetter2("button", 10, false);
 
+        //setting door slots
         TileSetter2("door", 9, true);
 
+        //setting block slots
         TileSetter2("block", 1, true);
 
+        //setting cannon slots
         GameObject[] gos = TileSetter2("cannon", 4, true);
 
         foreach (var g in gos)
