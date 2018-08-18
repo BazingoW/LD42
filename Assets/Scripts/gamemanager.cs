@@ -128,49 +128,67 @@ public class gamemanager : MonoBehaviour {
         //setting cannon slots
         GameObject[] gos = TileSetter2("cannon", 4, true);
 
+
+        //add cannon delegates
         foreach (var g in gos)
         {
             updateDelegate += g.GetComponent<Cannon>().PassTime;
         }
 
+        //setting tripwire slots
         gos = TileSetter2("tripwire", 4, true);
 
+
+        //add tripwire slots
         foreach (var g in gos)
         {
             updateDelegate += g.GetComponent<TripWire>().PassTime;
         }
-
     }
 
+
+    /// <summary>
+    /// Sets Tiles slots
+    /// </summary>
+    /// <param name="tag"></param>
+    /// <param name="value"></param>
+    /// <param name="isSolid"></param>
+    /// <returns></returns>
     GameObject[] TileSetter2(string tag, int value, bool isSolid)
     {
+        //finds objects with a certain tag
         GameObject[] c = GameObject.FindGameObjectsWithTag(tag);
 
-        
-
+        //for all
         foreach (var item in c)
         {
+            //fetches position
             Vector2Int aux = Get2DPos(item.transform.position);
 
+            //sets slot
             SetSlot(aux, value, item, isSolid);
         }
 
         return c;
     }
 
-   public  slot GetSlot(Vector2Int aux)
+    //get slot information
+    public  slot GetSlot(Vector2Int aux)
     {
         return board[aux.x, aux.y];
     }
 
+    //set slot information
     public  slot SetSlot(Vector2Int pos,int type,GameObject go=null,bool isSolid=false)
     {
+
         MonoBehaviour m = null;
 
+        //find monobehaviour
         if (go!=null)
           m = go.GetComponent<MonoBehaviour>();
         
-
+        //set everything up
         board[pos.x, pos.y].type = type;
         board[pos.x, pos.y].isSolid = isSolid;
         board[pos.x, pos.y].mono = m ;
@@ -184,17 +202,19 @@ public class gamemanager : MonoBehaviour {
 
 
    
-
+    //convert from 3D to 2D position
     public Vector2Int Get2DPos(Vector3 p)
     {
         return new Vector2Int(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.z));
     }
 
+    //convert from 2D to 3D position, height is by default 0
     public Vector3 Get3DPos(Vector2Int p, float y = 0)
     {
         return new Vector3(p.x,y,p.y);
     }
 
+    //checks if position is out of bounds
     public bool OutofBounds(Vector2Int coord)
     {
         if (coord.x >= 0 && coord.y >= 0 && coord.x < gridSize.x && coord.y < gridSize.y)
@@ -205,15 +225,10 @@ public class gamemanager : MonoBehaviour {
     }
 
     
-
-
-   
-	
-	// Update is called once per frame
+    // This function should be deleted
 	void Update () {
 
-        if (win)
-            return;
+ 
 
         if (Input.GetKeyDown(KeyCode.R))
         {
@@ -240,42 +255,39 @@ public class gamemanager : MonoBehaviour {
 
     }
 
+
+    //make bomb explosion
     public void Explode( Vector2Int origin)
     {
+        //iterate 3x3 blocks around it
         for (int i = origin.x-1; i <= origin.x+1; i++)
         {
             for (int j = origin.y-1; j <= origin.y+1; j++)
             {
+                //create black explosion block
                 Instantiate(explosionFab, Get3DPos(new Vector2Int(i, j)), Quaternion.identity);
 
-                //Debug.Log(new Vector2Int(i, j));
-                //Debug.Log(GetGridVal(new Vector2Int(i, j)));
-
+                //get slot at that position
                 slot s = GetSlot(new Vector2Int(i, j));
 
+                //if it is solid destroy it TODO this line doesnt work always??
                 if (s.isSolid)
                 {
-                    Debug.Log("Destroying");
-                    Debug.Log(new Vector2Int(i, j));
                     //destroy
                     Destroy(s.go);
 
                     //set slot as empty
                     SetSlot(new Vector2Int(i, j), 0, null, false);
                    
-
-
                 }
             }
         }
 
     }
 
+    //Update player position
     public Vector3 UpdatePos(Vector2Int move)
     {
-
-
-
         //output will be one of this two
         Vector2Int prevPos = playerPos;
         Vector2Int nextPos = playerPos + move;
@@ -286,7 +298,6 @@ public class gamemanager : MonoBehaviour {
 
 
         //if it is solid, stay in place
-
         if(GetSlot(nextPos).isSolid==true)
             return Get3DPos(prevPos, player.transform.position.y);
 
@@ -294,25 +305,19 @@ public class gamemanager : MonoBehaviour {
         //occupy previous position
         PutBlock(prevPos);
 
+        //call delegate
         MoveTime();
 
-        
-
-          
-    
-
-
-          
-
-         
-       
-
+        //update position
         playerPos = nextPos;
 
+        //get new position
         slot s = GetSlot(playerPos);
 
+        //check if it is a bomb
         if (s.type==6)
         {
+            //create explosion
             Explode(playerPos);
 
             //destroy
@@ -322,11 +327,9 @@ public class gamemanager : MonoBehaviour {
             SetSlot(playerPos, 0, null, false);
 
         }
-
-        if (s.type == 7)
+        //check if it is a coin
+        else if (s.type == 7)
         {
-            
-
             //destroy
             Destroy(s.go);
 
@@ -345,26 +348,11 @@ public class gamemanager : MonoBehaviour {
     
     void MoveTime()
     {
-
         updateDelegate();
-/*
-        for (int i = 0; i < gridSize.x; i++)
-        {
-            for (int j = 0; j < gridSize.y; j++)
-            {
-                if (board[i, j].mono != null)
-                {
-
-                    board[i, j].mono.SendMessage("PassTime");
-                }
-                
-
-            }
-        }*/
-
-        // item.SendMessage("PassTime");
     }
 
+
+    //put a new block
     public GameObject PutBlock( Vector2Int p)
     {
         
@@ -377,6 +365,7 @@ public class gamemanager : MonoBehaviour {
 
     }
 
+    //instantiate a grid
     void MakeGrid()
     {
         for(int i = 0; i<gridSize.x;i++)
@@ -391,6 +380,7 @@ public class gamemanager : MonoBehaviour {
 
     }
 
+    //print grid values
     void PrintGrid()
     {
         string str = "";
@@ -424,7 +414,8 @@ public class gamemanager : MonoBehaviour {
 
         }
         else
-        {
+        {   
+            //check if olayer reached goal after collecting all coins
             if(currentCoins==0 && GetSlot(playerPos).type == 3)
             {
                 Win();
